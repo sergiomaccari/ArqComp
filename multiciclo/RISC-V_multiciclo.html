@@ -1,0 +1,1270 @@
+<title>RISC-V Multiciclo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#EEF0F1;
+  --surface:#F9FAFA;
+  --surface-2:#E3E7E9;
+  --ink:#171C20;
+  --ink-2:#4A555D;
+  --ink-3:#7E888F;
+  --rule:#C7CED2;
+  --rule-soft:#DCE1E4;
+  --data:#0E6E75;
+  --data-tint:#D3E8E9;
+  --on-data:#F9FAFA;
+  --ctrl:#B4551A;
+  --ctrl-tint:#F2E0D2;
+  --shadow:0 1px 2px rgba(23,28,32,.06),0 8px 24px rgba(23,28,32,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#12161A;
+    --surface:#1A2026;
+    --surface-2:#232B32;
+    --ink:#E6EAEC;
+    --ink-2:#9AA6AE;
+    --ink-3:#6B767E;
+    --rule:#2E383F;
+    --rule-soft:#252E35;
+    --data:#54C1C8;
+    --data-tint:#183339;
+    --on-data:#0F1418;
+    --ctrl:#EC9A55;
+    --ctrl-tint:#34251A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12161A;
+  --surface:#1A2026;
+  --surface-2:#232B32;
+  --ink:#E6EAEC;
+  --ink-2:#9AA6AE;
+  --ink-3:#6B767E;
+  --rule:#2E383F;
+  --rule-soft:#252E35;
+  --data:#54C1C8;
+  --data-tint:#183339;
+  --on-data:#0F1418;
+  --ctrl:#EC9A55;
+  --ctrl-tint:#34251A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:0 96px}
+.col{max-width:660px}
+h1,h2,h3,h4,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+h2,h3,h4{text-wrap:balance}
+code{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace}
+
+header.hd{border-bottom:1px solid var(--rule);padding-block:56px 32px;margin-bottom:44px}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ctrl);margin:0 0 18px;
+}
+h1{
+  font-size:clamp(34px,6vw,54px);line-height:1.03;font-weight:700;
+  letter-spacing:-.022em;margin:0 0 20px;max-width:16ch;
+}
+.standfirst{font-size:20px;line-height:1.5;color:var(--ink-2);margin:0;max-width:60ch}
+.src{margin-top:26px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);line-height:1.7}
+
+section{margin-block:56px}
+h2{
+  font-size:13px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;
+  color:var(--ink-3);margin:0 0 8px;padding-bottom:9px;border-bottom:1px solid var(--rule);
+}
+h3{font-size:27px;font-weight:600;letter-spacing:-.014em;line-height:1.18;margin:22px 0 12px}
+h4{font-size:17px;font-weight:600;margin:26px 0 6px;letter-spacing:-.006em}
+p{margin:0 0 16px}
+.col p,.col li{max-width:66ch}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong,b{font-weight:600}
+a{color:var(--data)}
+code{font-size:.86em;background:var(--surface-2);padding:.1em .34em;border-radius:3px;color:var(--ink)}
+
+.plate{
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  box-shadow:var(--shadow);margin:28px 0 14px;overflow:hidden;
+}
+.plate-scroll{overflow-x:auto;padding:18px}
+.plate svg{display:block;min-width:760px;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:14.5px;line-height:1.55;color:var(--ink-2);max-width:78ch;margin:0 0 8px}
+figcaption b{color:var(--ink)}
+figure{margin:0}
+
+.legend{
+  display:flex;flex-wrap:wrap;gap:8px 20px;padding:12px 18px;
+  border-top:1px solid var(--rule-soft);background:var(--surface-2);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-2);align-items:center;
+}
+.legend i{display:inline-block;width:26px;height:0;margin-right:7px;vertical-align:middle}
+.legend .d{border-top:2px solid var(--data)}
+.legend .c{border-top:2px dashed var(--ctrl)}
+.legend .a{width:12px;height:12px;border:2px solid var(--data);background:var(--data-tint);border-radius:2px;margin-right:7px}
+
+.wire{fill:none;stroke:var(--ink-2);stroke-width:1.5;stroke-linejoin:round}
+.wire-ctrl{fill:none;stroke:var(--ctrl);stroke-width:1.4;stroke-dasharray:5 4;stroke-linejoin:round}
+.wire-en{fill:none;stroke:var(--ctrl);stroke-width:1.7;stroke-linejoin:round}
+.blk{fill:var(--surface-2);stroke:var(--ink-2);stroke-width:1.5}
+.blk.on{fill:var(--data-tint);stroke:var(--data);stroke-width:2.6}
+.t{fill:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:11px}
+.t-b{fill:var(--ink);font-family:Archivo,sans-serif;font-size:12.5px;font-weight:600}
+.t-s{fill:var(--ink-2);font-family:"IBM Plex Mono",monospace;font-size:9.5px}
+.t-c{fill:var(--ctrl);font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:500}
+.t-n{fill:var(--ink-3);font-family:Archivo,sans-serif;font-size:13px;font-weight:600}
+.t-arc{fill:var(--ink-2);font-family:"IBM Plex Mono",monospace;font-size:10px}
+.dot{fill:var(--ink-2)}
+#ah path,#ah2 path{fill:var(--ink-2)}
+#ac path,#ac2 path{fill:var(--ctrl)}
+.blk{transition:fill .22s ease,stroke .22s ease}
+
+.sim{background:var(--surface);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow);margin-top:26px}
+.sim-bar{display:flex;flex-wrap:wrap;gap:16px 28px;padding:16px 18px;border-bottom:1px solid var(--rule-soft);align-items:flex-end}
+.fieldlab{
+  display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:7px;
+}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;padding:6px 11px;
+  border:1px solid var(--rule);background:transparent;color:var(--ink-2);
+  border-radius:2px;cursor:pointer;line-height:1.2;
+}
+.pill:hover{border-color:var(--data);color:var(--ink)}
+.pill[aria-pressed="true"]{background:var(--data);border-color:var(--data);color:var(--on-data);font-weight:500}
+.pill:focus-visible,.step-btn:focus-visible{outline:2px solid var(--ctrl);outline-offset:2px}
+.step-btn{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;padding:6px 13px;
+  border:1px solid var(--rule);background:transparent;color:var(--ink);border-radius:2px;cursor:pointer;
+}
+.step-btn:hover:not(:disabled){border-color:var(--data)}
+.step-btn:disabled{opacity:.35;cursor:default}
+.sim-body{display:grid;grid-template-columns:minmax(0,1fr) 310px}
+.sim-stage{padding:14px;overflow-x:auto;border-right:1px solid var(--rule-soft)}
+.sim-stage svg{display:block;min-width:640px;max-width:100%;height:auto;margin:0 auto}
+.sim-note{padding:18px}
+.sim-note .cyc{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ctrl);margin:0 0 6px;
+}
+.sim-note h4{margin:0 0 8px;font-size:18px}
+.sim-note p{font-size:15px;line-height:1.55;margin:0 0 14px;color:var(--ink-2)}
+.siglist{display:flex;flex-wrap:wrap;gap:5px;margin:0;padding:0;list-style:none}
+.siglist li{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 7px;
+  background:var(--ctrl-tint);color:var(--ctrl);border-radius:2px;margin:0;
+}
+@media(max-width:860px){
+  .sim-body{grid-template-columns:1fr}
+  .sim-stage{border-right:0;border-bottom:1px solid var(--rule-soft)}
+}
+
+.tw{overflow-x:auto;margin:20px 0 10px;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.m{font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:nowrap}
+td.m b{color:var(--ctrl);font-weight:500}
+
+.blocks{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));
+  border-top:1px solid var(--rule);margin-top:24px;
+}
+.blk-item{border-bottom:1px solid var(--rule-soft);border-right:1px solid var(--rule-soft);padding:18px 20px 20px 0}
+.blk-item h4{margin:0 0 4px;font-size:16.5px}
+.blk-item .kind{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--data);display:block;margin-bottom:9px;
+}
+.blk-item p{font-size:14.6px;line-height:1.53;color:var(--ink-2);margin:0 0 9px}
+.blk-item p:last-child{margin-bottom:0}
+.blk-item .ctl{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ctrl)}
+
+.key{border-left:3px solid var(--ctrl);padding:4px 0 4px 20px;margin:26px 0;max-width:64ch}
+.key p{margin:0}
+.key p+p{margin-top:12px}
+
+.note{
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:18px 20px;margin:24px 0;font-size:15px;line-height:1.55;max-width:72ch;
+}
+.note h4{margin:0 0 7px;font-size:15.5px}
+.note p{margin:0 0 10px;color:var(--ink-2)}
+.note p:last-child{margin-bottom:0}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:72px;padding-top:22px;
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);line-height:1.8;
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:600px){
+  body{font-size:16px}
+  .blk-item{padding-right:0;border-right:0}
+}
+
+.st{border-top:1px solid var(--rule-soft);padding-top:22px;margin-top:34px}
+.st:first-of-type{border-top:1px solid var(--rule)}
+.st-head{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.st-num{
+  font-family:Archivo,sans-serif;font-size:34px;font-weight:700;color:var(--ctrl);
+  line-height:.9;letter-spacing:-.03em;
+}
+.st-head h4{margin:0;font-size:20px;letter-spacing:-.012em}
+.st-en{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  letter-spacing:.04em;display:block;margin-top:3px;font-weight:400;
+}
+.st-body{max-width:66ch}
+.st-body p{font-size:16px}
+.rtl{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.85;
+  background:var(--surface);border:1px solid var(--rule-soft);border-left:3px solid var(--data);
+  padding:12px 16px;margin:0 0 14px;white-space:pre;overflow-x:auto;color:var(--ink);
+}
+.st .siglist{margin-bottom:16px}
+.wires{list-style:none;padding-left:0;margin:0 0 14px}
+.wires li{
+  position:relative;padding-left:20px;margin-bottom:9px;
+  font-size:15.5px;line-height:1.55;color:var(--ink-2);max-width:64ch;
+}
+.wires li::before{
+  content:"";position:absolute;left:0;top:.66em;width:11px;height:0;
+  border-top:2px solid var(--data);
+}
+.wires li b,.st-body p b{color:var(--ink)}
+.cyc-count{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ctrl);
+  border:1px solid var(--ctrl);border-radius:2px;padding:2px 8px;align-self:center;
+}
+</style>
+
+<div class="page">
+
+<header class="hd">
+  <div class="col">
+    <p class="eyebrow">Arquitetura de Computadores · µProcessador</p>
+    <h1>RISC-V Multiciclo</h1>
+    <p class="standfirst">Os dois desenhos da foto, redesenhados: o caminho de dados com suas linhas de controle, e a máquina de estados que o comanda. Mais o que cada bloco é, fisicamente, e por que ele está ali.</p>
+    <p class="src">Patterson &amp; Hennessy, <i>Computer Organization and Design — RISC-V Edition</i><br>Seção online 4.5, <i>A Multicycle Implementation</i> · Figuras e4.5.4 e e4.5.12 · p. 282.e5</p>
+  </div>
+</header>
+
+<section>
+  <h2>Ponto de partida</h2>
+  <div class="col">
+    <h3>Por que “multiciclo”</h3>
+    <p>Num processador <b>monociclo</b>, toda instrução acontece em uma única batida de clock. O problema é que o clock precisa ser longo o bastante para a instrução <i>mais lenta</i> — o <code>lw</code>, que lê a memória duas vezes, usa o banco de registradores e a ULA. Todas as outras instruções pagam esse preço sem precisar.</p>
+    <p>A implementação <b>multiciclo</b> quebra cada instrução em passos curtos de um ciclo cada. O ciclo fica curto — cabe uma leitura de memória <i>ou</i> uma operação de ULA <i>ou</i> um acesso ao banco — e cada instrução usa só os passos de que precisa: <code>beq</code> gasta 3 ciclos, <code>sw</code> gasta 4, <code>lw</code> gasta 5.</p>
+    <p>Isso traz duas consequências que explicam quase tudo no desenho:</p>
+    <ul>
+      <li><b>Dá pra reaproveitar hardware.</b> Uma única memória serve instruções e dados; uma única ULA calcula <code>PC+4</code>, o endereço do desvio, o endereço do <code>lw</code> e a conta do tipo-R — só que em ciclos diferentes.</li>
+      <li><b>Aparecem registradores no meio do caminho.</b> Um valor calculado no ciclo 2 e usado no ciclo 4 precisa de algum lugar para morar enquanto isso. Daí os blocos <code>IR</code>, <code>MDR</code>, <code>A</code>, <code>B</code> e <code>ALUOut</code>, que não existem no monociclo.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Figura e4.5.4</h2>
+  <div class="col">
+    <h3>O caminho de dados completo</h3>
+    <p>Entradas e saídas de cada bloco, mais todas as linhas de controle. Dados em linha cheia, controle em <span style="color:var(--ctrl)">laranja tracejado</span> — essa separação é o que torna o desenho legível.</p>
+  </div>
+
+  <figure>
+  <div class="plate">
+    <div class="plate-scroll">
+<svg id="dp" viewBox="0 30 1160 690" role="img" aria-label="Caminho de dados multiciclo do RISC-V">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <!-- ===== unidade de controle ===== -->
+  <ellipse id="dp-ctrl" class="blk" cx="150" cy="100" rx="84" ry="54"/>
+  <text class="t-b" x="150" y="94" text-anchor="middle">Control</text>
+  <text class="t-s" x="150" y="113" text-anchor="middle">Op [6–0]</text>
+  <text class="t-s" x="150" y="128" text-anchor="middle">FSM de 9 estados</text>
+
+  <!-- ===== barramento de controle ===== -->
+  <path class="wire-ctrl" d="M234 100 L252 100 L252 178"/>
+  <path class="wire-ctrl" d="M100 178 L1090 178"/>
+  <text class="t-c" x="258" y="170">barramento de controle</text>
+
+  <path class="wire-ctrl" d="M117 178 L117 326" marker-end="url(#ac)"/>
+  <text class="t-c" x="122" y="192">IorD</text>
+  <path class="wire-ctrl" d="M200 178 L200 300" marker-end="url(#ac)"/>
+  <text class="t-c" x="206" y="192">MemRead</text>
+  <text class="t-c" x="206" y="206">MemWrite</text>
+  <path class="wire-ctrl" d="M380 178 L380 278" marker-end="url(#ac)"/>
+  <text class="t-c" x="386" y="192">IRWrite</text>
+  <path class="wire-ctrl" d="M449 178 L449 400" marker-end="url(#ac)"/>
+  <text class="t-c" x="455" y="192">MemtoReg</text>
+  <path class="wire-ctrl" d="M562 178 L562 290" marker-end="url(#ac)"/>
+  <text class="t-c" x="568" y="192">RegWrite</text>
+  <path class="wire-ctrl" d="M717 178 L717 286" marker-end="url(#ac)"/>
+  <text class="t-c" x="723" y="192">ALUSrcA</text>
+  <path class="wire-ctrl" d="M752 178 L752 470 L717 470 L717 452" marker-end="url(#ac)"/>
+  <text class="t-c" x="723" y="206">ALUSrcB</text>
+  <path class="wire-ctrl" d="M880 178 L880 540 L864 540" marker-end="url(#ac)"/>
+  <text class="t-c" x="886" y="192">ALUOp</text>
+  <path class="wire-ctrl" d="M1013 178 L1013 240" marker-end="url(#ac)"/>
+  <text class="t-c" x="1019" y="192">PCSource</text>
+
+  <!-- ===== lógica de escrita do PC ===== -->
+  <g id="dp-gates">
+    <path class="blk" d="M880 106 H901 A17 17 0 0 1 901 140 H880 Z"/>
+    <path class="blk" d="M938 126 Q950 146 938 166 H958 Q980 166 990 146 Q980 126 958 126 Z"/>
+  </g>
+  <text class="t-s" x="884" y="100">AND</text>
+  <text class="t-s" x="944" y="120">OR</text>
+  <path class="wire" d="M846 345 L858 345 L858 114 L880 114" marker-end="url(#ah)"/>
+  <text class="t-s" x="840" y="339" text-anchor="end">Zero</text>
+  <path class="wire-ctrl" d="M876 178 L876 132 L880 132" marker-end="url(#ac)"/>
+  <text class="t-c" x="870" y="166" text-anchor="end">PCWriteCond</text>
+  <path class="wire" d="M918 123 L928 123 L928 138 L938 138" marker-end="url(#ah)"/>
+  <path class="wire-ctrl" d="M932 178 L932 154 L938 154" marker-end="url(#ac)"/>
+  <text class="t-c" x="926" y="192" text-anchor="end">PCWrite</text>
+  <path class="wire-en" d="M990 146 L1090 146 L1090 266 L62 266 L62 330" marker-end="url(#ac)"/>
+  <text class="t-c" x="1084" y="118" text-anchor="end">habilita escrita do PC</text>
+
+  <!-- ===== PC ===== -->
+  <rect id="dp-pc" class="blk" x="40" y="330" width="44" height="66"/>
+  <text class="t-b" x="62" y="368" text-anchor="middle">PC</text>
+  <path class="wire" d="M84 363 L94 363 L94 344 L104 344" marker-end="url(#ah)"/>
+  <path class="wire" d="M74 330 L74 236 L690 236 L690 304 L704 304" marker-end="url(#ah)"/>
+
+  <!-- ===== mux IorD ===== -->
+  <rect id="dp-mux-iord" class="blk" x="104" y="326" width="26" height="74" rx="13"/>
+  <text class="t-s" x="117" y="340" text-anchor="middle">0</text>
+  <text class="t-s" x="117" y="360" text-anchor="middle">M<tspan x="117" dy="9">u</tspan><tspan x="117" dy="9">x</tspan></text>
+  <text class="t-s" x="117" y="396" text-anchor="middle">1</text>
+  <path class="wire" d="M130 363 L158 363" marker-end="url(#ah)"/>
+
+  <!-- ===== memória ===== -->
+  <rect id="dp-mem" class="blk" x="158" y="300" width="104" height="130"/>
+  <text class="t" x="166" y="322">Address</text>
+  <text class="t-b" x="166" y="358">Memory</text>
+  <text class="t" x="178" y="376">MemData</text>
+  <text class="t" x="166" y="404">Write</text>
+  <text class="t" x="166" y="416">data</text>
+  <path class="wire" d="M262 374 L280 374"/>
+  <circle class="dot" cx="280" cy="374" r="3"/>
+  <path class="wire" d="M280 374 L280 344 L296 344" marker-end="url(#ah)"/>
+  <path class="wire" d="M280 374 L280 476 L296 476" marker-end="url(#ah)"/>
+
+  <!-- ===== instruction register ===== -->
+  <rect id="dp-ir" class="blk" x="296" y="278" width="108" height="140"/>
+  <text class="t-s" x="303" y="300">Instruction [6–0]</text>
+  <text class="t-s" x="303" y="322">Instruction [19–15]</text>
+  <text class="t-s" x="303" y="352">Instruction [24–20]</text>
+  <text class="t-s" x="303" y="392">Instruction [11–7]</text>
+  <text class="t-b" x="303" y="412">Instruction register</text>
+  <text class="t-s" x="296" y="436">Instruction [31–0]</text>
+  <path class="wire" d="M296 278 L296 252 L150 252 L150 154" marker-end="url(#ah)"/>
+  <path class="wire" d="M404 318 L496 318" marker-end="url(#ah)"/>
+  <path class="wire" d="M404 348 L496 348" marker-end="url(#ah)"/>
+  <path class="wire" d="M404 388 L496 388" marker-end="url(#ah)"/>
+  <path class="wire" d="M404 404 L426 404 L426 552 L494 552" marker-end="url(#ah)"/>
+  <path class="wire" d="M404 410 L487 410 L487 684 L810 684 L810 572" marker-end="url(#ah)"/>
+  <text class="t-s" x="600" y="678" text-anchor="middle">Instruction [6–0]</text>
+
+  <!-- ===== memory data register ===== -->
+  <rect id="dp-mdr" class="blk" x="296" y="446" width="108" height="62"/>
+  <text class="t-b" x="350" y="470" text-anchor="middle">Memory</text>
+  <text class="t-b" x="350" y="484" text-anchor="middle">data</text>
+  <text class="t-b" x="350" y="498" text-anchor="middle">register</text>
+  <path class="wire" d="M404 458 L442 458" marker-end="url(#ah)"/>
+
+  <!-- ===== mux MemtoReg ===== -->
+  <rect id="dp-mux-memtoreg" class="blk" x="442" y="400" width="26" height="74" rx="13"/>
+  <text class="t-s" x="455" y="414" text-anchor="middle">0</text>
+  <text class="t-s" x="455" y="434" text-anchor="middle">M<tspan x="455" dy="9">u</tspan><tspan x="455" dy="9">x</tspan></text>
+  <text class="t-s" x="455" y="470" text-anchor="middle">1</text>
+  <path class="wire" d="M468 441 L480 441 L480 406 L496 406" marker-end="url(#ah)"/>
+
+  <!-- ===== banco de registradores ===== -->
+  <rect id="dp-regs" class="blk" x="496" y="290" width="132" height="130"/>
+  <text class="t" x="504" y="312">Read</text>
+  <text class="t" x="504" y="324">register 1</text>
+  <text class="t" x="504" y="342">Read</text>
+  <text class="t" x="504" y="354">register 2</text>
+  <text class="t-b" x="562" y="374" text-anchor="middle">Registers</text>
+  <text class="t" x="504" y="392">Write register</text>
+  <text class="t" x="504" y="410">Write data</text>
+  <text class="t" x="620" y="312" text-anchor="end">Read</text>
+  <text class="t" x="620" y="324" text-anchor="end">data 1</text>
+  <text class="t" x="620" y="398" text-anchor="end">Read</text>
+  <text class="t" x="620" y="410" text-anchor="end">data 2</text>
+  <path class="wire" d="M628 318 L652 318" marker-end="url(#ah)"/>
+  <path class="wire" d="M628 404 L652 404" marker-end="url(#ah)"/>
+
+  <!-- ===== A e B ===== -->
+  <rect id="dp-a" class="blk" x="652" y="302" width="32" height="32"/>
+  <text class="t-b" x="668" y="323" text-anchor="middle">A</text>
+  <rect id="dp-b" class="blk" x="652" y="388" width="32" height="32"/>
+  <text class="t-b" x="668" y="409" text-anchor="middle">B</text>
+  <path class="wire" d="M684 318 L697 318 L697 334 L704 334" marker-end="url(#ah)"/>
+  <path class="wire" d="M684 404 L698 404 L698 390 L704 390" marker-end="url(#ah)"/>
+  <path class="wire" d="M668 420 L668 600 L140 600 L140 408 L158 408" marker-end="url(#ah)"/>
+
+  <!-- ===== Imm Gen ===== -->
+  <ellipse id="dp-immgen" class="blk" cx="540" cy="552" rx="46" ry="30"/>
+  <text class="t-b" x="540" y="548" text-anchor="middle">Imm</text>
+  <text class="t-b" x="540" y="563" text-anchor="middle">Gen</text>
+  <path class="wire" d="M586 552 L686 552 L686 440 L704 440" marker-end="url(#ah)"/>
+
+  <!-- ===== muxes da ULA ===== -->
+  <rect id="dp-mux-srca" class="blk" x="704" y="286" width="26" height="66" rx="13"/>
+  <text class="t-s" x="717" y="300" text-anchor="middle">0</text>
+  <text class="t-s" x="717" y="314" text-anchor="middle">M<tspan x="717" dy="9">u</tspan><tspan x="717" dy="9">x</tspan></text>
+  <text class="t-s" x="717" y="348" text-anchor="middle">1</text>
+  <path class="wire" d="M730 319 L766 319" marker-end="url(#ah)"/>
+
+  <rect id="dp-mux-srcb" class="blk" x="704" y="372" width="26" height="80" rx="13"/>
+  <text class="t-s" x="717" y="386" text-anchor="middle">0</text>
+  <text class="t-s" x="717" y="410" text-anchor="middle">1</text>
+  <text class="t-s" x="717" y="436" text-anchor="middle">2</text>
+  <text class="t-s" x="736" y="400">M<tspan x="736" dy="9">u</tspan><tspan x="736" dy="9">x</tspan></text>
+  <text class="t-b" x="690" y="418" text-anchor="end">4</text>
+  <path class="wire" d="M694 414 L704 414" marker-end="url(#ah)"/>
+  <path class="wire" d="M730 412 L758 412 L758 396 L766 396" marker-end="url(#ah)"/>
+
+  <!-- ===== ULA ===== -->
+  <path id="dp-alu" class="blk" d="M766 290 L846 330 L846 400 L766 440 L766 378 L790 365 L766 352 Z"/>
+  <text class="t-b" x="802" y="360" text-anchor="middle">ALU</text>
+  <text class="t-s" x="842" y="391" text-anchor="end">result</text>
+
+  <ellipse id="dp-aluctrl" class="blk" cx="810" cy="540" rx="54" ry="32"/>
+  <text class="t-b" x="810" y="536" text-anchor="middle">ALU</text>
+  <text class="t-b" x="810" y="551" text-anchor="middle">control</text>
+  <path class="wire-ctrl" d="M810 508 L806 424" marker-end="url(#ac)"/>
+
+  <path class="wire" d="M846 385 L870 385 L870 258 L1000 258" marker-end="url(#ah)"/>
+  <circle class="dot" cx="870" cy="365" r="3"/>
+  <path class="wire" d="M870 365 L884 365" marker-end="url(#ah)"/>
+
+  <!-- ===== ALUOut ===== -->
+  <rect id="dp-aluout" class="blk" x="884" y="345" width="66" height="40"/>
+  <text class="t-b" x="917" y="370" text-anchor="middle">ALUOut</text>
+  <path class="wire" d="M950 365 L968 365"/>
+  <circle class="dot" cx="968" cy="365" r="3"/>
+  <circle class="dot" cx="968" cy="628" r="3"/>
+  <path class="wire" d="M968 365 L968 296 L1000 296" marker-end="url(#ah)"/>
+  <path class="wire" d="M968 365 L968 656 L414 656 L414 418 L442 418" marker-end="url(#ah)"/>
+  <path class="wire" d="M968 628 L90 628 L90 382 L104 382" marker-end="url(#ah)"/>
+
+  <!-- ===== mux PCSource ===== -->
+  <rect id="dp-mux-pcsrc" class="blk" x="1000" y="240" width="26" height="74" rx="13"/>
+  <text class="t-s" x="1013" y="254" text-anchor="middle">0</text>
+  <text class="t-s" x="1013" y="274" text-anchor="middle">M<tspan x="1013" dy="9">u</tspan><tspan x="1013" dy="9">x</tspan></text>
+  <text class="t-s" x="1013" y="310" text-anchor="middle">1</text>
+  <path class="wire" d="M1026 277 L1046 277 L1046 218 L24 218 L24 352 L40 352" marker-end="url(#ah)"/>
+</svg>
+    </div>
+    <div class="legend">
+      <span><i class="d"></i>caminho de dados</span>
+      <span><i class="c"></i>sinal de controle</span>
+      <span>•&nbsp;&nbsp;ponto cheio = conexão · cruzamento sem ponto = fios só passando</span>
+    </div>
+  </div>
+  <figcaption><b>Uma diferença em relação ao original.</b> No livro, as doze saídas da unidade de controle são listadas ao redor da elipse e cada fio é traçado individualmente até seu destino. Aqui elas saem num barramento único e cada derivação é rotulada junto ao bloco que ela comanda — mesma informação, muito menos espaguete.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Bloco a bloco</h2>
+  <div class="col">
+    <h3>O que cada caixa é, fisicamente</h3>
+    <p>Tudo no desenho é uma de três coisas: um <b>registrador</b> (flip-flops tipo D, guarda estado entre ciclos), um bloco <b>combinacional</b> (só portas lógicas, a saída acompanha a entrada) ou uma <b>memória</b>. Os muxes e a ULA são combinacionais; as caixas retangulares com nome próprio são registradores.</p>
+  </div>
+
+  <div class="blocks">
+
+    <div class="blk-item">
+      <h4>PC</h4><span class="kind">Registrador · 32 bits</span>
+      <p>Guarda o endereço da instrução atual. São 32 flip-flops D com <i>enable</i>: na borda do clock ele só carrega o valor novo se a habilitação estiver ativa.</p>
+      <p class="ctl">habilitação: PCWrite + PCWriteCond·Zero</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Mux IorD</h4><span class="kind">Combinacional · mux 2×1</span>
+      <p>Escolhe o que vai no barramento de endereço da memória: o <b>PC</b> (buscando instrução, ciclo 1) ou o <b>ALUOut</b> (endereço calculado do <code>lw</code>/<code>sw</code>). Só existe porque a memória é uma só.</p>
+      <p class="ctl">IorD: 0 = PC · 1 = ALUOut</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Memory</h4><span class="kind">Memória unificada</span>
+      <p>Guarda instrução <i>e</i> dado no mesmo array — organização von Neumann. Um endereço, uma porta de leitura (<code>MemData</code>), uma de escrita. É lenta: consome um ciclo inteiro, e é por isso que o <code>lw</code> precisa de dois ciclos de memória separados.</p>
+      <p class="ctl">MemRead · MemWrite</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Instruction register</h4><span class="kind">Registrador · 32 bits</span>
+      <p>Congela a instrução lida no ciclo 1. Tem que existir porque no ciclo 4 a mesma memória vai estar servindo <i>dados</i> — a instrução já não estaria mais na saída dela.</p>
+      <p>Os pedaços saem por campos fixos: <code>[6–0]</code> opcode, <code>[19–15]</code> rs1, <code>[24–20]</code> rs2, <code>[11–7]</code> rd. Não há circuito nenhum aqui, é só fiação — cortar um barramento em faixas é o <i>slicing</i> do VHDL.</p>
+      <p class="ctl">IRWrite</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Memory data register</h4><span class="kind">Registrador · 32 bits</span>
+      <p>Segura o dado que veio da memória no ciclo 4 para escrevê-lo no banco no ciclo 5. Sem ele o <code>lw</code> precisaria ler a memória e escrever no banco dentro do mesmo ciclo — que é justamente o ciclo longo que o multiciclo quer evitar.</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Registers</h4><span class="kind">Banco · 32 × 32 bits</span>
+      <p>Duas portas de leitura e uma de escrita. As leituras são <b>combinacionais</b> — dois muxes gigantes de 32×1 selecionados por <code>rs1</code> e <code>rs2</code>; o dado aparece sem esperar clock. A escrita é <b>síncrona</b>: um decoder ativa o <i>enable</i> de um único registrador, e só na borda.</p>
+      <p class="ctl">RegWrite</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>A e B</h4><span class="kind">Registradores · 32 bits</span>
+      <p>Capturam <code>Read data 1</code> e <code>Read data 2</code> no ciclo 2. Existem porque o banco é lido no ciclo 2 mas a ULA só vai usar esses valores no ciclo 3 ou 4 — e até lá o banco pode já estar endereçando outra coisa.</p>
+      <p>Repare que eles são carregados <i>sempre</i>, mesmo quando a instrução não usa registrador. Não faz mal: o lixo simplesmente é ignorado.</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Imm Gen</h4><span class="kind">Combinacional</span>
+      <p>Olha a instrução inteira, descobre o formato pelo opcode e monta o imediato de 32 bits com <b>extensão de sinal</b>. No RISC-V os bits do imediato ficam espalhados em posições diferentes conforme o formato (I, S, B, U, J) — este bloco é a fiação que remonta cada caso.</p>
+      <p>Em VHDL: concatenação <code>&amp;</code>, <i>slicing</i> e um <code>when-else</code> sobre o opcode. Nada além disso.</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Mux ALUSrcA</h4><span class="kind">Combinacional · mux 2×1</span>
+      <p>Primeira entrada da ULA: <b>PC</b> (para calcular <code>PC+4</code> e o endereço do desvio) ou <b>A</b> (para contas de verdade).</p>
+      <p class="ctl">ALUSrcA: 0 = PC · 1 = A</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Mux ALUSrcB</h4><span class="kind">Combinacional · mux 4×1</span>
+      <p>Segunda entrada da ULA. Três fontes usadas: <b>B</b>, a constante <b>4</b> (para <code>PC+4</code>) e o <b>imediato</b> (endereço do <code>lw</code>/<code>sw</code>, deslocamento do desvio).</p>
+      <p>Esse “4” fixo é literalmente um barramento amarrado em <code>0…0100</code>: constante em hardware não custa porta nenhuma.</p>
+      <p class="ctl">ALUSrcB: 00 = B · 01 = 4 · 10 = imediato</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>ALU</h4><span class="kind">Combinacional</span>
+      <p>O único bloco que faz aritmética. Soma, subtrai, AND, OR. Produz o resultado e a flag <code>Zero</code>, que é um NOR de 32 entradas em cima do resultado — vale 1 exatamente quando todos os bits são 0.</p>
+      <p>Ela é reusada até quatro vezes dentro de uma mesma execução: <code>PC+4</code>, endereço de desvio, endereço de memória, conta do tipo-R. Cada uso num ciclo diferente.</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>ALU control</h4><span class="kind">Combinacional · decodificador</span>
+      <p>Traduz <code>ALUOp</code> (2 bits, vindos da FSM) mais os campos de função da instrução na seleção de operação da ULA. É o <b>segundo nível</b> de decodificação: a FSM só diz “é soma de endereço” (00), “é subtração de comparação” (01) ou “olha a instrução” (10), e este bloquinho resolve o resto.</p>
+      <p>Dividir assim mantém a FSM pequena — ela não precisa conhecer todas as operações aritméticas que existem.</p>
+      <p class="ctl">ALUOp: 00 soma · 01 subtrai · 10 usa a instrução</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>ALUOut</h4><span class="kind">Registrador · 32 bits</span>
+      <p>Guarda a saída da ULA para o ciclo seguinte. É ele que segura o endereço do <code>lw</code> enquanto a memória é acessada, e o endereço do desvio enquanto a FSM decide se o desvio vai ser tomado.</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Mux MemtoReg</h4><span class="kind">Combinacional · mux 2×1</span>
+      <p>Decide o que é escrito no banco de registradores: o resultado da ULA (tipo-R) ou o dado vindo da memória (<code>lw</code>).</p>
+      <p class="ctl">MemtoReg: 0 = ALUOut · 1 = MDR</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Mux PCSource</h4><span class="kind">Combinacional · mux 2×1</span>
+      <p>Escolhe o próximo PC: a saída <i>direta</i> da ULA (que no ciclo 1 vale <code>PC+4</code>) ou o <b>ALUOut</b> (que no ciclo 3 guarda o endereço do desvio, calculado especulativamente no ciclo 2).</p>
+      <p class="ctl">PCSource: 0 = ALU result · 1 = ALUOut</p>
+    </div>
+
+    <div class="blk-item">
+      <h4>AND / OR do PC</h4><span class="kind">Combinacional · 2 portas</span>
+      <p>Duas portas lógicas que valem uma aula inteira: <code>PCWrite OR (PCWriteCond AND Zero)</code>.</p>
+      <p><code>PCWrite</code> escreve o PC incondicionalmente (ciclo de busca). <code>PCWriteCond</code> diz “escreve <i>se</i> deu igual” — e quem responde é a flag <code>Zero</code> da ULA. <b>É assim, e só assim, que um desvio condicional acontece no hardware.</b></p>
+    </div>
+
+    <div class="blk-item">
+      <h4>Control</h4><span class="kind">Máquina de estados</span>
+      <p>Recebe o opcode e, a cada ciclo, faz duas coisas: emite o conjunto de sinais do estado atual e escolhe o próximo estado. É uma FSM de Moore — as saídas dependem só do estado, nunca diretamente da entrada.</p>
+      <p>É o desenho da segunda figura.</p>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Referência</h2>
+  <div class="col"><h3>Os sinais de controle</h3>
+  <p>Sete são de 1 bit (ligado/desligado) e cinco selecionam caminho. Regra da FSM: sinal não listado num estado vale 0.</p></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Sinal</th><th>Bits</th><th>O que faz</th></tr></thead>
+      <tbody>
+        <tr><td class="m"><b>PCWrite</b></td><td>1</td><td>Escreve o PC incondicionalmente.</td></tr>
+        <tr><td class="m"><b>PCWriteCond</b></td><td>1</td><td>Escreve o PC <i>se</i> a flag <code>Zero</code> da ULA estiver em 1.</td></tr>
+        <tr><td class="m"><b>IorD</b></td><td>1</td><td>Endereço da memória: 0 = PC (instrução), 1 = ALUOut (dado).</td></tr>
+        <tr><td class="m"><b>MemRead</b></td><td>1</td><td>Coloca o conteúdo do endereço em <code>MemData</code>.</td></tr>
+        <tr><td class="m"><b>MemWrite</b></td><td>1</td><td>Grava <code>Write data</code> no endereço.</td></tr>
+        <tr><td class="m"><b>IRWrite</b></td><td>1</td><td>Carrega o <i>instruction register</i> com o que veio da memória.</td></tr>
+        <tr><td class="m"><b>RegWrite</b></td><td>1</td><td>Grava no banco de registradores.</td></tr>
+        <tr><td class="m"><b>MemtoReg</b></td><td>1</td><td>Dado escrito no banco: 0 = ALUOut, 1 = MDR.</td></tr>
+        <tr><td class="m"><b>PCSource</b></td><td>1</td><td>Próximo PC: 0 = saída da ULA (<code>PC+4</code>), 1 = ALUOut (desvio).</td></tr>
+        <tr><td class="m"><b>ALUSrcA</b></td><td>1</td><td>Entrada A da ULA: 0 = PC, 1 = registrador A.</td></tr>
+        <tr><td class="m"><b>ALUSrcB</b></td><td>2</td><td>Entrada B da ULA: 00 = B, 01 = constante 4, 10 = imediato.</td></tr>
+        <tr><td class="m"><b>ALUOp</b></td><td>2</td><td>Para o ALU control: 00 = soma, 01 = subtrai, 10 = decodifica a instrução.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Figura e4.5.12</h2>
+  <div class="col">
+    <h3>A máquina de estados que comanda tudo</h3>
+    <p>Cada bolha é <b>um ciclo de clock</b>. O que está escrito dentro é o conjunto de sinais que a unidade de controle mantém ativos durante aquele ciclo; os rótulos nas setas são as condições testadas para escolher o próximo estado. Seta sem rótulo é transição incondicional.</p>
+    <p>Os estados <b>0</b> e <b>1</b> são comuns a toda instrução — só depois de decodificar o opcode é que os caminhos se separam.</p>
+  </div>
+
+  <figure>
+  <div class="plate">
+    <div class="plate-scroll">
+<svg id="fsm" viewBox="0 -26 1020 838" role="img" aria-label="Máquina de estados de controle multiciclo">
+  <defs>
+    <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <!-- espinha de retorno ao estado 0 -->
+  <path class="wire" d="M960 730 L960 10 L270 10 L270 44" marker-end="url(#ah2)"/>
+  <path class="wire" d="M768 418 L960 418"/>
+  <circle class="dot" cx="960" cy="418" r="3.5"/>
+  <path class="wire" d="M460 638 L460 700 L960 700"/>
+  <circle class="dot" cx="960" cy="700" r="3.5"/>
+  <path class="wire" d="M270 632 L270 716 L960 716"/>
+  <circle class="dot" cx="960" cy="716" r="3.5"/>
+  <path class="wire" d="M154 730 L960 730"/>
+
+  <!-- start -->
+  <path class="wire" d="M100 120 L194 120" marker-end="url(#ah2)"/>
+  <text class="t-b" x="50" y="124">Start</text>
+
+  <!-- estado 0 -->
+  <text class="t-arc" x="270" y="-6" text-anchor="middle">Instruction fetch</text>
+  <circle id="fsm-0" class="blk" cx="270" cy="120" r="76"/>
+  <text class="t-n" x="184" y="60">0</text>
+  <text class="t" x="270" y="76" text-anchor="middle">MemRead</text>
+  <text class="t" x="270" y="91" text-anchor="middle">ALUSrcA = 0</text>
+  <text class="t" x="270" y="106" text-anchor="middle">IorD = 0</text>
+  <text class="t" x="270" y="121" text-anchor="middle">IRWrite</text>
+  <text class="t" x="270" y="136" text-anchor="middle">ALUSrcB = 01</text>
+  <text class="t" x="270" y="151" text-anchor="middle">ALUOp = 00</text>
+  <text class="t" x="270" y="166" text-anchor="middle">PCWrite</text>
+  <text class="t" x="270" y="181" text-anchor="middle">PCSource = 0</text>
+
+  <!-- estado 1 -->
+  <path class="wire" d="M346 120 L500 120" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="560" y="26" text-anchor="middle">Instruction decode /</text>
+  <text class="t-arc" x="560" y="40" text-anchor="middle">register fetch</text>
+  <circle id="fsm-1" class="blk" cx="560" cy="120" r="60"/>
+  <text class="t-n" x="490" y="72">1</text>
+  <text class="t" x="560" y="108" text-anchor="middle">ALUSrcA = 0</text>
+  <text class="t" x="560" y="124" text-anchor="middle">ALUSrcB = 10</text>
+  <text class="t" x="560" y="140" text-anchor="middle">ALUOp = 00</text>
+
+  <!-- arcos de decodificação -->
+  <path class="wire" d="M514 166 L202 316" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="336" y="228" text-anchor="middle" transform="rotate(-26 336 228)">(Op = 'LW') or (Op = 'SW')</text>
+  <path class="wire" d="M543 180 L450 312" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="472" y="242" text-anchor="middle" transform="rotate(-55 472 242)">(Op = R-type)</text>
+  <path class="wire" d="M597 172 L692 306" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="670" y="242" text-anchor="middle" transform="rotate(55 670 242)">(Op = 'BEQ')</text>
+
+  <!-- estado 2 -->
+  <text class="t-arc" x="140" y="282" text-anchor="middle">Memory address</text>
+  <text class="t-arc" x="140" y="296" text-anchor="middle">computation</text>
+  <circle id="fsm-2" class="blk" cx="140" cy="370" r="60"/>
+  <text class="t-n" x="66" y="320">2</text>
+  <text class="t" x="140" y="358" text-anchor="middle">ALUSrcA = 1</text>
+  <text class="t" x="140" y="374" text-anchor="middle">ALUSrcB = 10</text>
+  <text class="t" x="140" y="390" text-anchor="middle">ALUOp = 00</text>
+
+  <!-- estado 6 -->
+  <text class="t-arc" x="430" y="296" text-anchor="middle">Execution</text>
+  <circle id="fsm-6" class="blk" cx="430" cy="370" r="60"/>
+  <text class="t-n" x="356" y="320">6</text>
+  <text class="t" x="430" y="358" text-anchor="middle">ALUSrcA = 1</text>
+  <text class="t" x="430" y="374" text-anchor="middle">ALUSrcB = 00</text>
+  <text class="t" x="430" y="390" text-anchor="middle">ALUOp = 10</text>
+
+  <!-- estado 8 -->
+  <text class="t-arc" x="720" y="282" text-anchor="middle">Branch</text>
+  <text class="t-arc" x="720" y="296" text-anchor="middle">completion</text>
+  <circle id="fsm-8" class="blk" cx="720" cy="370" r="68"/>
+  <text class="t-n" x="638" y="314">8</text>
+  <text class="t" x="720" y="344" text-anchor="middle">ALUSrcA = 1</text>
+  <text class="t" x="720" y="360" text-anchor="middle">ALUSrcB = 00</text>
+  <text class="t" x="720" y="376" text-anchor="middle">ALUOp = 01</text>
+  <text class="t" x="720" y="392" text-anchor="middle">PCWriteCond</text>
+  <text class="t" x="720" y="408" text-anchor="middle">PCSource = 1</text>
+
+  <!-- arcos para a linha de baixo -->
+  <path class="wire" d="M112 428 L104 526" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="66" y="480" text-anchor="middle" transform="rotate(-84 66 480)">(Op = 'LW')</text>
+  <text class="t-arc" x="170" y="476" text-anchor="middle">Memory</text>
+  <text class="t-arc" x="170" y="490" text-anchor="middle">access</text>
+  <path class="wire" d="M184 418 L252 530" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="206" y="482" text-anchor="middle" transform="rotate(-58 206 482)">(Op = 'SW')</text>
+  <text class="t-arc" x="336" y="476" text-anchor="middle">Memory</text>
+  <text class="t-arc" x="336" y="490" text-anchor="middle">access</text>
+  <path class="wire" d="M452 428 L468 520" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="560" y="506" text-anchor="middle">R-type completion</text>
+
+  <!-- estado 3 -->
+  <circle id="fsm-3" class="blk" cx="100" cy="580" r="52"/>
+  <text class="t-n" x="36" y="536">3</text>
+  <text class="t" x="100" y="576" text-anchor="middle">MemRead</text>
+  <text class="t" x="100" y="592" text-anchor="middle">IorD = 1</text>
+
+  <!-- estado 5 -->
+  <circle id="fsm-5" class="blk" cx="270" cy="580" r="52"/>
+  <text class="t-n" x="208" y="536">5</text>
+  <text class="t" x="270" y="576" text-anchor="middle">MemWrite</text>
+  <text class="t" x="270" y="592" text-anchor="middle">IorD = 1</text>
+
+  <!-- estado 7 -->
+  <circle id="fsm-7" class="blk" cx="460" cy="580" r="58"/>
+  <text class="t-n" x="392" y="534">7</text>
+  <text class="t" x="460" y="568" text-anchor="middle">RegDst = 1</text>
+  <text class="t" x="460" y="584" text-anchor="middle">RegWrite</text>
+  <text class="t" x="460" y="600" text-anchor="middle">MemtoReg = 0</text>
+
+  <!-- estado 3 -> 4 -->
+  <path class="wire" d="M100 632 L100 674" marker-end="url(#ah2)"/>
+  <text class="t-arc" x="116" y="650">Memory read</text>
+  <text class="t-arc" x="116" y="664">completion step</text>
+
+  <!-- estado 4 -->
+  <circle id="fsm-4" class="blk" cx="100" cy="730" r="54"/>
+  <text class="t-n" x="34" y="688">4</text>
+  <text class="t" x="100" y="718" text-anchor="middle">RegDst = 0</text>
+  <text class="t" x="100" y="734" text-anchor="middle">RegWrite</text>
+  <text class="t" x="100" y="750" text-anchor="middle">MemtoReg = 1</text>
+</svg>
+    </div>
+    <div class="legend">
+      <span><i class="a"></i>estado ativo no simulador abaixo</span>
+      <span>•&nbsp;&nbsp;cada bolha = 1 ciclo de clock</span>
+      <span>•&nbsp;&nbsp;sinal não listado vale 0</span>
+    </div>
+  </div>
+  <figcaption><b>O número solto fora de cada bolha</b> é o número do estado, do jeito que o livro numera. A linha que sobe pela direita é o retorno ao estado 0 — toda instrução termina reiniciando o ciclo de busca.</figcaption>
+  </figure>
+
+  <div class="note">
+    <h4>Duas esquisitices desta figura</h4>
+    <p><b>O <code>RegDst</code> nos estados 4 e 7.</b> Esse sinal é herança da edição MIPS do livro, onde o registrador de destino podia estar em dois campos diferentes da instrução e um mux escolhia entre eles. No RISC-V o destino é sempre <code>rd</code> = <code>Instruction[11–7]</code>, e de fato <b>não há mux RegDst no caminho de dados ao lado</b> — nem <code>RegDst</code> entre as saídas da unidade de controle. Pode ignorar.</p>
+    <p><b>O rótulo <code>Instruction [6–0]</code> entrando no ALU control.</b> Só o opcode não distingue <code>add</code> de <code>sub</code> de <code>and</code> — no RISC-V são todos o mesmo opcode. O que o ALU control realmente precisa é do <code>funct3</code> = <code>Instruction[14–12]</code> e do bit 30 (do <code>funct7</code>), que é como a Figura 4.29 do mesmo livro rotula. O desenho foi reproduzido como está impresso, mas vale saber.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Passo a passo</h2>
+  <div class="col">
+    <h3>Os nove estados, um ciclo cada</h3>
+    <p>Cada bolha da figura acima é <b>exatamente um ciclo de clock</b>. O que está escrito dentro dela é o conjunto de sinais que a unidade de controle mantém ligados naquele ciclo; tudo que não está escrito vale 0. O que segue é o que acontece dentro de cada uma, e qual fio do caminho de dados acende.</p>
+
+    <p>Antes de entrar nelas, a regra que resolve metade das dúvidas — <b>nem todo registrador do desenho tem sinal de escrita</b>:</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Registrador</th><th>Grava quando</th><th>Por quê</th></tr></thead>
+      <tbody>
+        <tr><td class="m"><b>PC</b></td><td><code>PCWrite</code> <b>ou</b> (<code>PCWriteCond</code> <b>e</b> <code>Zero</code>)</td><td>É o que as duas portas do canto superior esquerdo da e4.5.4 fazem.</td></tr>
+        <tr><td class="m"><b>IR</b></td><td>só com <code>IRWrite</code></td><td>A instrução precisa sobreviver os 3 a 5 ciclos inteiros.</td></tr>
+        <tr><td class="m"><b>MDR, A, B, ALUOut</b></td><td><b>todo ciclo</b>, sem sinal nenhum</td><td>O conteúdo só é usado no ciclo imediatamente seguinte — sobrescrever depois é inofensivo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>É por isso que a bolha 1 lê o banco de registradores sem ter nenhum sinal de leitura escrito nela.</p>
+  </div>
+
+  <div class="col">
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">0</span>
+      <h4>Busca da instrução<span class="st-en">Instruction fetch</span></h4>
+      <span class="cyc-count">toda instrução</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">IR &lt;= Memória[PC]
+PC &lt;= PC + 4</div>
+      <ul class="siglist">
+        <li>MemRead</li><li>IorD = 0</li><li>IRWrite</li><li>ALUSrcA = 0</li><li>ALUSrcB = 01</li><li>ALUOp = 00</li><li>PCWrite</li><li>PCSource = 0</li>
+      </ul>
+      <p>Duas coisas acontecem em paralelo, em caminhos que não se cruzam:</p>
+      <ul class="wires">
+        <li><b>A busca.</b> <code>PC</code> → <b>Mux IorD</b> entrada 0 → <code>Address</code> da <b>Memory</b>. O <code>MemRead</code> põe a palavra em <code>MemData</code>, que entra no <b>Instruction register</b> — e ele grava porque <code>IRWrite</code> está ligado.</li>
+        <li><b>O incremento.</b> <code>PC</code> → <b>Mux ALUSrcA</b> entrada 0; a constante <b>4</b> → <b>Mux ALUSrcB</b> entrada 01; <code>ALUOp = 00</code> manda a ULA somar; <code>ALU result</code> → <b>Mux PCSource</b> entrada 0 → volta ao <code>PC</code>, que grava porque <code>PCWrite</code> está ligado.</li>
+      </ul>
+      <div class="key">
+        <p>Neste ciclo ninguém precisa da ULA para calcular endereço, então ela é aproveitada como somador do PC. Num monociclo existiria um somador dedicado só para isso — <b>é uma das duas somadoras que o multiciclo elimina</b>.</p>
+      </div>
+      <p>O <code>PC+4</code> também é gravado no <code>ALUOut</code>, já que ele grava todo ciclo. O livro chama essa escrita de <i>benign</i>: ninguém nunca lê dali.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">1</span>
+      <h4>Decodificação e leitura dos registradores<span class="st-en">Instruction decode / register fetch</span></h4>
+      <span class="cyc-count">toda instrução</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">A      &lt;= Reg[IR[19:15]]
+B      &lt;= Reg[IR[24:20]]
+ALUOut &lt;= PC + imediato</div>
+      <ul class="siglist">
+        <li>ALUSrcA = 0</li><li>ALUSrcB = 10</li><li>ALUOp = 00</li>
+      </ul>
+      <p>Três sinais só, e mesmo assim é o ciclo em que mais coisa acontece:</p>
+      <ul class="wires">
+        <li><b>A leitura do banco, sem sinal nenhum.</b> <code>Instruction[19–15]</code> (o <code>rs1</code>) está fisicamente ligado em <code>Read register 1</code>, e <code>Instruction[24–20]</code> (o <code>rs2</code>) em <code>Read register 2</code>. <code>Read data 1</code> e <code>Read data 2</code> caem em <b>A</b> e <b>B</b>, que gravam todo ciclo. Não é controle, é fiação.</li>
+        <li><b>O cálculo especulativo do desvio.</b> <code>PC</code> → <b>Mux ALUSrcA</b> entrada 0; a saída do <b>Imm Gen</b> → <b>Mux ALUSrcB</b> entrada 10; soma → <b>ALUOut</b>. Isso é <code>PC + imediato</code>, o endereço-alvo de um <code>beq</code>.</li>
+        <li><b>A decodificação.</b> Ao mesmo tempo, <code>Instruction[6–0]</code> chega na entrada <code>Op[6–0]</code> do oval <b>Control</b>. É agora que a máquina de estados descobre por qual das três setas sair.</li>
+      </ul>
+      <div class="key">
+        <p>Por que é seguro calcular o desvio antes de saber se a instrução é um desvio? Porque <b>nada de estado arquitetural é escrito</b> neste ciclo: o PC não grava, não há <code>RegWrite</code> nem <code>MemWrite</code>. <code>A</code>, <code>B</code> e <code>ALUOut</code> são rascunho.</p>
+        <p>O livro chama essas de <i>ações otimistas</i>: neste ponto só dá pra fazer o que serve a toda instrução, ou o que não causa dano caso a instrução não seja a que se imagina. E elas só são possíveis pela regularidade do formato — se há dois operandos em registrador, eles <i>sempre</i> estão nos campos <code>rs1</code> e <code>rs2</code>.</p>
+      </div>
+      <p>O que se ganha: o <code>beq</code> fecha em 3 ciclos em vez de 4.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">2</span>
+      <h4>Cálculo do endereço<span class="st-en">Memory address computation</span></h4>
+      <span class="cyc-count">lw · sw</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">ALUOut &lt;= A + imediato</div>
+      <ul class="siglist">
+        <li>ALUSrcA = 1</li><li>ALUSrcB = 10</li><li>ALUOp = 00</li>
+      </ul>
+      <ul class="wires">
+        <li><b>A</b> → <b>Mux ALUSrcA</b> entrada 1 (agora é o registrador, não mais o PC); <b>Imm Gen</b> → <b>Mux ALUSrcB</b> entrada 10; soma → <b>ALUOut</b>, sobrescrevendo o alvo de desvio calculado no ciclo anterior. Ninguém iria usá-lo mesmo.</li>
+      </ul>
+      <p><code>lw</code> e <code>sw</code> dividem esta bolha porque a conta do endereço é a mesma nos dois casos — <code>base + deslocamento</code>. A diferença entre o imediato do tipo I e o do tipo S fica toda dentro do <b>Imm Gen</b>.</p>
+      <p>É só na saída daqui que os dois se separam, e quem decide é de novo o opcode: <code>(Op = 'LW')</code> desce para o estado 3, <code>(Op = 'SW')</code> para o 5.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">3</span>
+      <h4>Leitura da memória<span class="st-en">Memory access</span></h4>
+      <span class="cyc-count">lw</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">MDR &lt;= Memória[ALUOut]</div>
+      <ul class="siglist">
+        <li>MemRead</li><li>IorD = 1</li>
+      </ul>
+      <ul class="wires">
+        <li>O <b>Mux IorD</b> vira para a <b>entrada 1</b>: o endereço agora vem do <b>ALUOut</b>, não do PC. É a mesma memória do estado 0, endereçada de outro jeito.</li>
+        <li><code>MemRead</code> põe o dado em <code>MemData</code> → cai no <b>Memory data register</b>, que grava sozinho.</li>
+      </ul>
+      <p>Um ciclo inteiro só para isso porque o acesso à memória é justamente a operação que define o período do clock — o projeto assume que <b>num ciclo cabe um acesso à memória <i>ou</i> um acesso ao banco <i>ou</i> uma operação de ULA</b>, nunca dois.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">4</span>
+      <h4>Escrita do dado lido<span class="st-en">Memory read completion step</span></h4>
+      <span class="cyc-count">lw</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">Reg[IR[11:7]] &lt;= MDR</div>
+      <ul class="siglist">
+        <li>RegWrite</li><li>MemtoReg = 1</li><li>RegDst = 0</li>
+      </ul>
+      <ul class="wires">
+        <li><b>MDR</b> → <b>Mux MemtoReg</b> entrada 1 → <code>Write data</code> do banco de registradores.</li>
+        <li><code>Instruction[11–7]</code> (o <code>rd</code>) está ligado direto em <code>Write register</code>, e o <code>RegWrite</code> efetiva a escrita.</li>
+      </ul>
+      <p>É esta bolha que faz o <code>lw</code> custar <b>5 ciclos</b>, um a mais que todo mundo: o dado só passa a existir no fim do ciclo anterior, dentro do MDR. Escrever no banco exige um ciclo próprio porque, nas palavras do livro, o ciclo de clock não comporta o acesso à memória e a escrita no banco juntos.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">5</span>
+      <h4>Escrita na memória<span class="st-en">Memory access</span></h4>
+      <span class="cyc-count">sw</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">Memória[ALUOut] &lt;= B</div>
+      <ul class="siglist">
+        <li>MemWrite</li><li>IorD = 1</li>
+      </ul>
+      <ul class="wires">
+        <li><b>ALUOut</b> → <b>Mux IorD</b> entrada 1 → <code>Address</code>; o registrador <b>B</b> está ligado em <code>Write data</code> da <b>Memory</b>; <code>MemWrite</code> grava.</li>
+      </ul>
+      <p>O <code>B</code> guarda o <code>rs2</code> desde o estado 1 e ainda está válido — o número do registrador vem do <code>IR</code>, que não mudou, então o banco continua entregando o mesmo valor em todo ciclo.</p>
+      <p>O <code>sw</code> termina aqui, em <b>4 ciclos</b>. Não há nada para escrever em registrador, então a seta vai direto de volta ao estado 0.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">6</span>
+      <h4>Execução<span class="st-en">Execution</span></h4>
+      <span class="cyc-count">tipo R</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">ALUOut &lt;= A op B</div>
+      <ul class="siglist">
+        <li>ALUSrcA = 1</li><li>ALUSrcB = 00</li><li>ALUOp = 10</li>
+      </ul>
+      <ul class="wires">
+        <li><b>A</b> → <b>Mux ALUSrcA</b> entrada 1 e <b>B</b> → <b>Mux ALUSrcB</b> entrada 00: pela primeira vez os dois operandos da ULA vêm do banco de registradores. O resultado vai para o <b>ALUOut</b>.</li>
+      </ul>
+      <p>Aqui é onde o <code>ALUOp</code> mostra para que serve. Ele é o contrato entre o <b>Control</b> e o <b>ALU control</b>, e tem três valores:</p>
+      <ul>
+        <li><code>00</code> — “sempre some”, usado nos estados 0, 1 e 2;</li>
+        <li><code>01</code> — “sempre subtraia”, usado no estado 8;</li>
+        <li><code>10</code> — “olhe os campos de função da instrução e decida”.</li>
+      </ul>
+      <p>Só com <code>10</code> é que o <b>ALU control</b> precisa pensar: ele lê os campos de função e emite os bits que escolhem entre <code>add</code>, <code>sub</code>, <code>and</code>, <code>or</code>, <code>slt</code>. A unidade de controle principal nunca sabe qual operação é — ela só sabe que é tipo R.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">7</span>
+      <h4>Escrita do resultado<span class="st-en">R-type completion</span></h4>
+      <span class="cyc-count">tipo R</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">Reg[IR[11:7]] &lt;= ALUOut</div>
+      <ul class="siglist">
+        <li>RegWrite</li><li>MemtoReg = 0</li><li>RegDst = 1</li>
+      </ul>
+      <ul class="wires">
+        <li><b>ALUOut</b> → <b>Mux MemtoReg</b> entrada 0 → <code>Write data</code>; <code>Instruction[11–7]</code> → <code>Write register</code>; <code>RegWrite</code> grava.</li>
+      </ul>
+      <p>É a mesma escrita do estado 4, só que com o mux virado para o outro lado: lá o valor vinha da memória, aqui vem da ULA. Tipo R fecha em <b>4 ciclos</b>.</p>
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="st-head">
+      <span class="st-num">8</span>
+      <h4>Conclusão do desvio<span class="st-en">Branch completion</span></h4>
+      <span class="cyc-count">beq</span>
+    </div>
+    <div class="st-body">
+      <div class="rtl">se (A == B) PC &lt;= ALUOut</div>
+      <ul class="siglist">
+        <li>ALUSrcA = 1</li><li>ALUSrcB = 00</li><li>ALUOp = 01</li><li>PCWriteCond</li><li>PCSource = 1</li>
+      </ul>
+      <p>Este é o único estado que usa a saída <code>Zero</code> e as duas portas lógicas do canto superior esquerdo da e4.5.4. Vale seguir o caminho inteiro:</p>
+      <ul class="wires">
+        <li><b>A</b> e <b>B</b> entram na ULA como no estado 6, mas <code>ALUOp = 01</code> manda <b>subtrair</b>. A saída <code>Zero</code> vale 1 se e somente se <code>A == B</code>. O resultado da subtração é descartado — só a flag interessa.</li>
+        <li><code>Zero</code> entra na porta <b>AND</b> junto com <code>PCWriteCond</code>.</li>
+        <li>A saída do AND entra na porta <b>OR</b> junto com <code>PCWrite</code>, que aqui vale 0. A saída do OR é o <i>write enable</i> do <b>PC</b> — ou seja, quem manda no momento é o <code>Zero</code>.</li>
+        <li><code>PCSource = 1</code> faz o <b>Mux PCSource</b> escolher o <b>ALUOut</b> — que ainda guarda o <code>PC + imediato</code> calculado lá no estado 1.</li>
+      </ul>
+      <p>Se os registradores forem iguais, o PC recebe o alvo do desvio. Se não forem, o write enable fica em 0 e o PC simplesmente <b>mantém o <code>PC+4</code></b> que já havia sido escrito no estado 0. Em nenhum dos casos existe um ciclo extra — e é por isso que <code>beq</code> é a instrução mais curta, com <b>3 ciclos</b>.</p>
+    </div>
+  </div>
+
+  </div>
+
+  <div class="col">
+    <h4>O caminho de cada instrução</h4>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Instrução</th><th>Estados percorridos</th><th>Ciclos</th><th>Termina em</th></tr></thead>
+      <tbody>
+        <tr><td class="m"><b>beq</b></td><td class="m">0 → 1 → 8</td><td>3</td><td>conclusão do desvio</td></tr>
+        <tr><td class="m"><b>tipo R</b></td><td class="m">0 → 1 → 6 → 7</td><td>4</td><td>escrita no banco</td></tr>
+        <tr><td class="m"><b>sw</b></td><td class="m">0 → 1 → 2 → 5</td><td>4</td><td>escrita na memória</td></tr>
+        <tr><td class="m"><b>lw</b></td><td class="m">0 → 1 → 2 → 3 → 4</td><td>5</td><td>escrita no banco</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <h4>Quanto isso vale, em número</h4>
+    <p>O livro faz a conta com a mistura de instruções do SPECINT2006 — 20% <i>loads</i>, 8% <i>stores</i>, 62% aritméticas e 10% desvios:</p>
+    <p><code>CPI = 0,20 × 5 + 0,08 × 4 + 0,62 × 4 + 0,10 × 3 = <b>4,10</b></code></p>
+    <p>Contra um CPI de 5,0 se toda instrução gastasse o pior caso. O ganho do multiciclo vem dos dois lados: o período do clock é ditado pelo <b>passo mais lento</b> (o acesso à memória) em vez do caminho completo da pior instrução, e as instruções que não precisam de todos os passos terminam antes.</p>
+  </div>
+
+  <div class="note">
+    <h4>Mais três resíduos da edição MIPS</h4>
+    <p><b><code>PCSource</code> aparece como sinal de 2 bits</b> na tabela e4.5.5, com um terceiro valor <code>10</code> descrito como “o endereço de <i>jump</i>, formado deslocando <code>IR[25:0]</code> dois bits à esquerda e concatenando com <code>PC+4[31:28]</code>”. Isso é montagem de endereço do MIPS e não existe no RISC-V. A máquina de estados só usa <code>0</code> e <code>1</code>, e o mux do desenho tem duas entradas.</p>
+    <p><b>A legenda da Figura e4.5.8</b> descreve o estado 1 como “<code>ALUSrcB = 11</code>, fazendo os 16 bits inferiores do IR, deslocados e estendidos em sinal, irem para a ULA”. A figura ao lado diz <code>ALUSrcB = 10</code>, e o RISC-V não desloca imediato de desvio nem trabalha com 16 bits. O texto não foi atualizado na conversão.</p>
+    <p><b>O texto do estado 8</b> afirma que, num desvio tomado, “o PC é escrito duas vezes: uma pela saída da ULA (durante a decodificação) e outra pelo ALUOut”. A primeira escrita é no <b>estado 0</b>, não no 1 — no estado 1 o <code>PCWrite</code> está desligado. A ideia está certa (o PC é mesmo escrito duas vezes, e a última é a que vale), o nome do passo é que saiu trocado.</p>
+    <p>Todos esses vêm da mesma origem: a própria abertura da seção avisa que ela “descreve a implementação multiciclo do <b>MIPS</b>”. O que se vê é uma conversão para RISC-V com pontas soltas.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Simulador</h2>
+  <div class="col">
+    <h3>Uma instrução, ciclo a ciclo</h3>
+    <p>Escolha uma instrução e avance os ciclos. Os blocos que trabalham naquele ciclo acendem nos dois desenhos — no caminho de dados lá em cima e na máquina de estados aqui do lado.</p>
+  </div>
+
+  <div class="sim">
+    <div class="sim-bar">
+      <div>
+        <span class="fieldlab">Instrução</span>
+        <div class="pills" id="instr-pills" role="group" aria-label="Escolha a instrução"></div>
+      </div>
+      <div>
+        <span class="fieldlab">Ciclo</span>
+        <div class="pills" id="cycle-pills" role="group" aria-label="Escolha o ciclo"></div>
+      </div>
+      <div>
+        <span class="fieldlab">Navegar</span>
+        <div class="pills">
+          <button class="step-btn" id="prev" type="button">◀ anterior</button>
+          <button class="step-btn" id="next" type="button">próximo ▶</button>
+        </div>
+      </div>
+    </div>
+    <div class="sim-body">
+      <div class="sim-stage" id="stage"></div>
+      <div class="sim-note">
+        <p class="cyc" id="cyc-lab">Ciclo 1 de 5 · Estado 0</p>
+        <h4 id="cyc-title">Busca da instrução</h4>
+        <p id="cyc-text"></p>
+        <span class="fieldlab">Sinais ativos</span>
+        <ul class="siglist" id="cyc-sigs"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>A ideia central</h2>
+  <div class="col">
+    <h3>Por que tanto registrador no meio do caminho</h3>
+    <p>Comparando este desenho com o de um processador monociclo, a diferença mais visível não é a ULA nem a memória — é que <b>cinco caixas novas</b> aparecem no meio dos fios: <code>IR</code>, <code>MDR</code>, <code>A</code>, <code>B</code> e <code>ALUOut</code>.</p>
+
+    <div class="key">
+      <p>Num circuito combinacional, um valor existe só enquanto as entradas que o produziram estiverem estáveis. No monociclo isso basta, porque tudo acontece dentro de um único ciclo.</p>
+      <p>No multiciclo, não. A memória vai ser reendereçada, o banco vai ser relido, a ULA vai calcular outra coisa. <b>Todo valor que precisa sobreviver até o próximo ciclo tem que estar guardado em flip-flops.</b> Essa é a regra inteira.</p>
+    </div>
+
+    <p>Dá pra ler o desenho de trás pra frente e conferir: cada registrador temporário está exatamente onde um valor atravessa uma fronteira de ciclo.</p>
+    <ul>
+      <li><code>IR</code> — a instrução é lida no ciclo 1 e usada até o ciclo 5.</li>
+      <li><code>A</code>, <code>B</code> — lidos do banco no ciclo 2, usados na ULA no 3 ou no 4.</li>
+      <li><code>ALUOut</code> — calculado num ciclo, usado no seguinte (endereço, resultado ou alvo do desvio).</li>
+      <li><code>MDR</code> — dado lido da memória no ciclo 4, escrito no banco no 5.</li>
+    </ul>
+
+    <h3>O cálculo especulativo do desvio</h3>
+    <p>Repare no estado 1. Ele decodifica a instrução <i>e</i>, ao mesmo tempo, manda a ULA somar <code>PC + imediato</code> guardando em <code>ALUOut</code>. Isso antes de saber se a instrução é sequer um desvio.</p>
+    <p>É de graça: a ULA estaria ociosa nesse ciclo de qualquer jeito, e o <code>ALUOut</code> também. Se a instrução acabar sendo um <code>beq</code>, o endereço de destino já está pronto e o desvio custa 3 ciclos em vez de 4. Se não for, o valor é simplesmente descartado. É a primeira aparição, em miniatura, da ideia que vira <i>execução especulativa</i> nos processadores modernos.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Do papel para o VHDL</h2>
+  <div class="col">
+    <h3>Onde cada bloco desses cai no projeto</h3>
+    <p>Este desenho é o mapa do processador que o laboratório está construindo por partes. Traduzindo:</p>
+    <ul>
+      <li><b>A caixa <code>ALU</code></b> é a ULA do lab 5. As entradas <code>entrada_a</code> e <code>entrada_b</code> são as saídas dos dois muxes; <code>resultado</code> vai para o <code>ALUOut</code>. A única flag que <i>este</i> caminho de dados consome é a <code>Zero</code> — que no desenho vai direto para a porta AND do PC. Carry, negativo e overflow ficam guardados para os saltos condicionais mais à frente.</li>
+      <li><b><code>ALU control</code></b> é quem gera o <code>selec_op</code> da entidade. Ele não vem da instrução diretamente nem da FSM sozinha: é a combinação das duas.</li>
+      <li><b>Todo mux do desenho</b> é uma cadeia <code>when-else</code> terminada em constante. <code>IorD</code>, <code>MemtoReg</code> e <code>PCSource</code> são 2×1; <code>ALUSrcB</code> é 4×1 com três entradas usadas — exatamente a forma do mux 8×1 com entradas fixas do lab 5.</li>
+      <li><b><code>Imm Gen</code> e os campos do <code>IR</code></b> são só <i>slicing</i> e concatenação: <code>instrucao(19 downto 15)</code>, <code>instrucao(31) &amp; ...</code>. Sem porta lógica nenhuma.</li>
+      <li><b>Os registradores</b> (<code>PC</code>, <code>IR</code>, <code>A</code>, <code>B</code>, <code>ALUOut</code>, <code>MDR</code>) são a parte que <i>ainda não apareceu</i> nos labs — são sequenciais e precisam de clock. Até aqui tudo foi combinacional puro.</li>
+      <li><b>A unidade de controle</b> é a FSM da segunda figura: um registrador de estado mais lógica combinacional que decide o próximo estado e as saídas.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  Redesenhado a partir de Patterson &amp; Hennessy, <i>Computer Organization and Design — RISC-V Edition</i>, seção online 4.5, Figuras e4.5.4 e e4.5.12.<br>
+  O “e” nos números de figura e na página 282.e5 marca material eletrônico: esta seção não está no livro impresso. Edição (1ª ou 2ª) não identificável pela foto.<br>
+  UTFPR / DAELN — Engenharia de Computação · Arquitetura de Computadores
+</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DP_BLOCKS = ["dp-pc","dp-mux-iord","dp-mem","dp-ir","dp-mdr","dp-mux-memtoreg",
+    "dp-regs","dp-a","dp-b","dp-immgen","dp-mux-srca","dp-mux-srcb","dp-alu",
+    "dp-aluctrl","dp-aluout","dp-mux-pcsrc","dp-ctrl","dp-gates"];
+
+  var S = {
+    0:{t:"Busca da instrução",
+       x:"O PC endereça a memória (IorD = 0) e a instrução lida é gravada no IR. No mesmo ciclo a ULA já calcula PC+4 — entrada A = PC, entrada B = constante 4 — e o resultado vai direto para o PC pelo mux PCSource. Uma leitura de memória e uma soma, em paralelo, sem conflito.",
+       s:["MemRead","ALUSrcA = 0","IorD = 0","IRWrite","ALUSrcB = 01","ALUOp = 00","PCWrite","PCSource = 0"],
+       b:["dp-ctrl","dp-pc","dp-mux-iord","dp-mem","dp-ir","dp-mux-srca","dp-mux-srcb","dp-alu","dp-mux-pcsrc","dp-gates"]},
+    1:{t:"Decodificação e leitura dos registradores",
+       x:"O opcode já está no IR, então a FSM sabe que instrução é. Enquanto decodifica, o banco é lido pelos campos rs1 e rs2 — sem saber ainda se a instrução usa registrador — e os valores caem em A e B. Em paralelo, a ULA soma PC + imediato e guarda em ALUOut: o endereço de desvio, calculado antes de saber se é um desvio.",
+       s:["ALUSrcA = 0","ALUSrcB = 10","ALUOp = 00"],
+       b:["dp-ctrl","dp-ir","dp-regs","dp-a","dp-b","dp-immgen","dp-mux-srca","dp-mux-srcb","dp-alu","dp-aluout"]},
+    2:{t:"Cálculo do endereço de memória",
+       x:"Agora a ULA soma o registrador base (A) com o imediato montado pelo Imm Gen. O endereço efetivo do lw/sw fica em ALUOut, pronto para o ciclo seguinte.",
+       s:["ALUSrcA = 1","ALUSrcB = 10","ALUOp = 00"],
+       b:["dp-ctrl","dp-a","dp-immgen","dp-mux-srca","dp-mux-srcb","dp-alu","dp-aluout"]},
+    3:{t:"Leitura da memória",
+       x:"O mux IorD agora aponta para ALUOut (IorD = 1) em vez do PC — mesma memória, outro endereço. O dado lido cai no MDR. A instrução continua guardada no IR, que é exatamente o motivo daquele registrador existir.",
+       s:["MemRead","IorD = 1"],
+       b:["dp-ctrl","dp-aluout","dp-mux-iord","dp-mem","dp-mdr"]},
+    4:{t:"Escrita no registrador",
+       x:"O dado sai do MDR, passa pelo mux MemtoReg (= 1) e é gravado no registrador rd. Fim do lw: cinco ciclos, a instrução mais longa do conjunto.",
+       s:["RegWrite","MemtoReg = 1"],
+       b:["dp-ctrl","dp-mdr","dp-mux-memtoreg","dp-regs","dp-ir"]},
+    5:{t:"Escrita na memória",
+       x:"Endereço vem de ALUOut (IorD = 1) e o dado a gravar vem do registrador B, carregado lá no ciclo 2. O sw acaba aqui: não escreve em registrador nenhum, então não precisa de um quinto ciclo.",
+       s:["MemWrite","IorD = 1"],
+       b:["dp-ctrl","dp-aluout","dp-mux-iord","dp-mem","dp-b"]},
+    6:{t:"Execução",
+       x:"As duas entradas da ULA vêm dos registradores A e B. ALUOp = 10 manda o ALU control olhar os campos de função da instrução para decidir a operação. O resultado fica em ALUOut.",
+       s:["ALUSrcA = 1","ALUSrcB = 00","ALUOp = 10"],
+       b:["dp-ctrl","dp-a","dp-b","dp-mux-srca","dp-mux-srcb","dp-aluctrl","dp-alu","dp-aluout"]},
+    7:{t:"Escrita do resultado",
+       x:"O conteúdo de ALUOut passa pelo mux MemtoReg (= 0, vem da ULA e não da memória) e é gravado em rd. Quatro ciclos no total: o tipo-R não toca a memória de dados.",
+       s:["RegWrite","MemtoReg = 0"],
+       b:["dp-ctrl","dp-aluout","dp-mux-memtoreg","dp-regs","dp-ir"]},
+    8:{t:"Conclusão do desvio",
+       x:"A ULA subtrai A − B (ALUOp = 01) só para produzir a flag Zero: se os registradores forem iguais, Zero = 1. PCWriteCond está ativo, então a porta AND libera a escrita do PC apenas nesse caso — e PCSource = 1 escolhe o ALUOut, onde o endereço de destino espera desde o ciclo 2. Se forem diferentes, o PC simplesmente não é escrito e a execução segue em frente.",
+       s:["ALUSrcA = 1","ALUSrcB = 00","ALUOp = 01","PCWriteCond","PCSource = 1"],
+       b:["dp-ctrl","dp-a","dp-b","dp-mux-srca","dp-mux-srcb","dp-alu","dp-gates","dp-mux-pcsrc","dp-pc","dp-aluout"]}
+  };
+
+  var INSTR = [
+    {id:"lw",   label:"lw x5, 8(x6)",     states:[0,1,2,3,4]},
+    {id:"sw",   label:"sw x5, 8(x6)",     states:[0,1,2,5]},
+    {id:"rtype",label:"add x5, x6, x7",   states:[0,1,6,7]},
+    {id:"beq",  label:"beq x6, x7, alvo", states:[0,1,8]}
+  ];
+
+  var cur = 0, step = 0;
+  var stage   = document.getElementById("stage");
+  var iPills  = document.getElementById("instr-pills");
+  var cPills  = document.getElementById("cycle-pills");
+  var prevBtn = document.getElementById("prev");
+  var nextBtn = document.getElementById("next");
+
+  var fsmCopy = document.getElementById("fsm").cloneNode(true);
+  fsmCopy.removeAttribute("id");
+  fsmCopy.setAttribute("aria-hidden","true");
+  var i, nodes = fsmCopy.querySelectorAll("[id]");
+  for(i=0;i<nodes.length;i++){ nodes[i].id = "sim-" + nodes[i].id; }
+  stage.appendChild(fsmCopy);
+
+  function clearOn(){
+    var j, el;
+    for(j=0;j<DP_BLOCKS.length;j++){
+      el = document.getElementById(DP_BLOCKS[j]);
+      if(el){ el.classList.remove("on"); }
+    }
+    for(j=0;j<=8;j++){
+      el = document.getElementById("sim-fsm-"+j); if(el){ el.classList.remove("on"); }
+      el = document.getElementById("fsm-"+j);     if(el){ el.classList.remove("on"); }
+    }
+  }
+
+  function buildCycles(){
+    var inst = INSTR[cur];
+    cPills.textContent = "";
+    for(var j=0;j<inst.states.length;j++){
+      (function(k){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "pill";
+        b.id = "cyc-" + inst.id + "-" + k;
+        b.textContent = String(k+1);
+        b.setAttribute("aria-pressed", k===step ? "true" : "false");
+        b.setAttribute("aria-label","Ciclo "+(k+1));
+        b.addEventListener("click", function(){ step = k; render(); });
+        cPills.appendChild(b);
+      })(j);
+    }
+  }
+
+  function render(){
+    var inst = INSTR[cur];
+    var st   = inst.states[step];
+    var info = S[st];
+    var j, el;
+
+    clearOn();
+    for(j=0;j<info.b.length;j++){
+      el = document.getElementById(info.b[j]);
+      if(el){ el.classList.add("on"); }
+    }
+    el = document.getElementById("sim-fsm-"+st); if(el){ el.classList.add("on"); }
+    el = document.getElementById("fsm-"+st);     if(el){ el.classList.add("on"); }
+
+    document.getElementById("cyc-lab").textContent =
+      "Ciclo " + (step+1) + " de " + inst.states.length + " · Estado " + st;
+    document.getElementById("cyc-title").textContent = info.t;
+    document.getElementById("cyc-text").textContent  = info.x;
+
+    var ul = document.getElementById("cyc-sigs");
+    ul.textContent = "";
+    for(j=0;j<info.s.length;j++){
+      var li = document.createElement("li");
+      li.textContent = info.s[j];
+      ul.appendChild(li);
+    }
+
+    var ip = iPills.children;
+    for(j=0;j<ip.length;j++){ ip[j].setAttribute("aria-pressed", j===cur ? "true" : "false"); }
+    buildCycles();
+    prevBtn.disabled = (step === 0);
+    nextBtn.disabled = (step === inst.states.length-1);
+  }
+
+  for(i=0;i<INSTR.length;i++){
+    (function(k){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "pill";
+      b.id = "instr-" + INSTR[k].id;
+      b.textContent = INSTR[k].label;
+      b.addEventListener("click", function(){ cur = k; step = 0; render(); });
+      iPills.appendChild(b);
+    })(i);
+  }
+
+  prevBtn.addEventListener("click", function(){ if(step>0){ step--; render(); } });
+  nextBtn.addEventListener("click", function(){
+    if(step < INSTR[cur].states.length-1){ step++; render(); }
+  });
+
+  render();
+})();
+</script>
